@@ -48,7 +48,6 @@
                     THIÊN NGƯU BAY BIỂN
                 </h2>
                 
-                <!-- Ô Nhập / Đăng Ký Nickname -->
                 <div class="w-full max-w-xs mb-4">
                     <label class="block text-xs font-bold text-cyan-300 mb-1 text-left">ĐĂNG KÝ NICKNAME CỦA BẠN:</label>
                     <input type="text" id="nicknameInput" maxlength="12" placeholder="Nhập nickname..." 
@@ -60,7 +59,7 @@
                 </button>
             </div>
 
-            <!-- Màn Hình Thua & Bảng Xếp Hạng Online Theo Nickname -->
+            <!-- Màn Hình Thua & Bảng Xếp Hạng Online -->
             <div id="gameOverScreen" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center z-30">
                 <div class="w-full max-w-sm bg-slate-900 border-2 border-amber-500/80 rounded-2xl p-4 shadow-2xl">
                     <h2 class="text-xl font-black text-red-500 mb-1 uppercase tracking-wide">
@@ -78,7 +77,7 @@
                         </div>
                     </div>
 
-                    <!-- Bảng Xếp Hạng Đám Mây Theo Nickname -->
+                    <!-- Bảng Xếp Hạng Online -->
                     <div class="bg-slate-950/60 p-2.5 rounded-xl border border-cyan-500/30 mb-3">
                         <h3 class="text-[11px] font-black text-cyan-300 uppercase mb-1 flex items-center justify-center gap-1">
                             🏆 BẢNG XẾP HẠNG TOP 5 ONLINE 🏆
@@ -93,39 +92,9 @@
                         BAY LẠI
                     </button>
 
-                    <!-- Nút Ủng Hộ Tác Giả -->
-                    <button id="donateBtn" class="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-xs rounded-full border border-teal-300 shadow-md transform transition active:scale-95 flex items-center justify-center gap-1">
-                        ☕ 🛠️ ỨNG HỘ TÁC GIẢ PHÁT TRIỂN GAME
-                    </button>
-                </div>
-            </div>
-
-            <!-- Popup Ủng Hộ / Donate (VietQR) -->
-            <div id="donateModal" class="hidden absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center z-40">
-                <div class="w-full max-w-sm bg-slate-900 border-2 border-emerald-500/80 rounded-2xl p-5 shadow-2xl relative">
-                    <button id="closeDonateBtn" class="absolute top-2 right-3 text-gray-400 hover:text-white font-bold text-xl px-2">✕</button>
-
-                    <h3 class="text-base font-black text-emerald-400 uppercase mb-1">
-                        ☕ ỦNG HỘ TÁC GIẢ
-                    </h3>
-                    <p class="text-xs text-gray-300 mb-3">
-                        Cảm ơn bạn đã trải nghiệm "Thiên Ngưu"! Sự ủng hộ của bạn là động lực để mình nâng cấp thêm nhiều tính năng mới.
-                    </p>
-
-                    <!-- Tự động tạo QR Vietcombank chuẩn VietQR -->
-                    <div class="bg-white p-2 rounded-xl inline-block mb-3 shadow-md border-2 border-emerald-400">
-                        <img src="https://img.vietqr.io/image/VCB-0441000615301-compact2.png?accountName=CAO%20DUC%20CHINH&amount=0&addInfo=UNG%20HO%20GAME%20THIEN%20NGUU" 
-                             alt="Mã QR Vietcombank CAO DUC CHINH" class="w-44 h-44 object-contain">
-                    </div>
-
-                    <div class="text-xs text-cyan-200 font-bold space-y-1 bg-slate-800 p-2.5 rounded-xl border border-slate-700">
-                        <p>Ngân hàng: <span class="text-amber-300">Vietcombank</span></p>
-                        <p>Số TK: <span class="text-amber-300">0441000615301</span></p>
-                        <p>Chủ TK: <span class="text-amber-300">CAO DUC CHINH</span></p>
-                    </div>
-
-                    <button id="backFromDonateBtn" class="mt-4 w-full py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 font-bold text-xs rounded-full border border-slate-600">
-                        QUAY LẠI GAME
+                    <!-- Nút Mở QR Donate -->
+                    <button id="donateBtn" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-black text-xs rounded-full border border-teal-300 shadow-md transform transition active:scale-95 flex items-center justify-center gap-1 uppercase tracking-wide">
+                        ☕ BẤM VÀO ỦNG HỘ
                     </button>
                 </div>
             </div>
@@ -141,7 +110,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // KẾT NỐI FIREBASE DATABASE (LƯU VÀ TẢI BẢNG XẾP HẠNG ONLINE)
+        // KẾT NỐI FIREBASE DATABASE
         const firebaseConfig = {
             databaseURL: "https://thien-nguu-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -156,14 +125,19 @@
         canvas.width = V_WIDTH;
         canvas.height = V_HEIGHT;
 
-        // Tự động khôi phục Nickname nếu từng đăng ký trước đây
         let playerNickname = localStorage.getItem('thiennguu_nickname') || '';
         if (playerNickname) {
             document.getElementById('nicknameInput').value = playerNickname;
         }
 
+        // TẢI HÌNH ẢNH MÃ QR VIETQR CỦA BÁC CAO DUC CHINH
+        const qrImage = new Image();
+        qrImage.src = "https://img.vietqr.io/image/VCB-0441000615301-compact2.png?accountName=CAO%20DUC%20CHINH&amount=0&addInfo=UNG%20HO%20GAME%20THIEN%20NGUU";
+
+        let showDonateOverlay = false;
+
         // ----------------------------------------------------
-        // HỆ THỐNG ÂM THANH & NHẠC NỀN LIÊN TỤC (PRECISE SCHEDULER)
+        // HỆ THỐNG ÂM THANH & NHẠC NỀN
         // ----------------------------------------------------
         let audioCtx = null;
         let isBgmPlaying = false;
@@ -240,16 +214,12 @@
         function scheduleNote(note, time) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
             osc.type = 'sine';
             osc.frequency.setValueAtTime(note.freq, time);
-            
             gain.gain.setValueAtTime(0.12, time);
             gain.gain.exponentialRampToValueAtTime(0.001, time + note.duration);
-            
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
             osc.start(time);
             osc.stop(time + note.duration);
         }
@@ -486,6 +456,75 @@
             ctx.fill();
         }
 
+        // VẼ POPUP DONATE TRỰC TIẾP LÊN CANVAS CỦA GAME
+        function drawDonateOverlay() {
+            if (!showDonateOverlay) return;
+
+            // Nền tối mờ phủ canvas
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.92)';
+            ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+
+            // Khung chứa Popup
+            const boxW = 380;
+            const boxH = 480;
+            const boxX = (V_WIDTH - boxW) / 2;
+            const boxY = (V_HEIGHT - boxH) / 2;
+
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(boxX, boxY, boxW, boxH, 20);
+            ctx.fill();
+            ctx.stroke();
+
+            // Tiêu đề
+            ctx.fillStyle = '#34d399';
+            ctx.font = 'bold 20px Montserrat, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('☕ ỦNG HỘ TÁC GIẢ', V_WIDTH / 2, boxY + 40);
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '11px Montserrat, sans-serif';
+            ctx.fillText('Quét mã VietQR Vietcombank để ủng hộ phát triển game', V_WIDTH / 2, boxY + 62);
+
+            // Mã QR
+            const qrSize = 210;
+            const qrX = (V_WIDTH - qrSize) / 2;
+            const qrY = boxY + 80;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10);
+            if (qrImage.complete) {
+                ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+            }
+
+            // Thông tin chuyển khoản
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(boxX + 20, boxY + 310, boxW - 40, 90);
+            
+            ctx.fillStyle = '#fde047';
+            ctx.font = 'bold 12px Montserrat, sans-serif';
+            ctx.fillText('Ngân hàng: Vietcombank', V_WIDTH / 2, boxY + 332);
+            ctx.fillText('Số TK: 0441000615301', V_WIDTH / 2, boxY + 354);
+            ctx.fillText('Chủ TK: CAO DUC CHINH', V_WIDTH / 2, boxY + 376);
+
+            // Nút đóng "ĐÓNG / QUAY LẠI"
+            const btnW = 200;
+            const btnH = 38;
+            const btnX = (V_WIDTH - btnW) / 2;
+            const btnY = boxY + 418;
+
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.roundRect(btnX, btnY, btnW, btnH, 19);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 13px Montserrat, sans-serif';
+            ctx.fillText('✕ ĐÓNG CỬA SỔ', V_WIDTH / 2, btnY + 24);
+        }
+
         function saveOnlineScore(nickname, currentScore) {
             let userBest = parseInt(localStorage.getItem('thiennguu_best') || '0');
             if (currentScore > userBest) {
@@ -582,7 +621,6 @@
                 }
 
                 pipes.forEach(pipe => pipe.draw());
-
                 buffalo.draw();
 
                 ctx.fillStyle = '#ffffff';
@@ -594,11 +632,21 @@
                 buffalo.draw();
             }
 
+            // Vẽ Donate Canvas nếu đang bật
+            drawDonateOverlay();
+
             requestAnimationFrame(gameLoop);
         }
 
-        function handleTap() {
+        function handleTap(e) {
             initAudio();
+
+            // Nếu đang mở Donate Popup, bấm vào đâu trên canvas cũng sẽ đóng
+            if (showDonateOverlay) {
+                showDonateOverlay = false;
+                return;
+            }
+
             if (gameState === 'PLAYING') {
                 buffalo.flap();
             }
@@ -619,6 +667,7 @@
             pipes = [];
             score = 0;
             frameCount = 0;
+            showDonateOverlay = false;
             gameState = 'PLAYING';
             startBGM();
 
@@ -626,31 +675,19 @@
             document.getElementById('gameOverScreen').classList.add('hidden');
         }
 
-        // XỬ LÝ ĐÓNG/MỞ POPUP DONATE
-        const donateModal = document.getElementById('donateModal');
-        const donateBtn = document.getElementById('donateBtn');
-        const closeDonateBtn = document.getElementById('closeDonateBtn');
-        const backFromDonateBtn = document.getElementById('backFromDonateBtn');
-
-        donateBtn.addEventListener('click', () => {
-            donateModal.classList.remove('hidden');
-        });
-
-        closeDonateBtn.addEventListener('click', () => {
-            donateModal.classList.add('hidden');
-        });
-
-        backFromDonateBtn.addEventListener('click', () => {
-            donateModal.classList.add('hidden');
+        // Nút Ủng Hộ Tác Giả ở HTML kích hoạt mở Overlay dính liền trên Canvas Game
+        document.getElementById('donateBtn').addEventListener('click', () => {
+            showDonateOverlay = true;
         });
 
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
-                if (gameState === 'PLAYING') handleTap();
-                else if (gameState === 'START' || gameState === 'GAMEOVER') {
-                    if (donateModal.classList.contains('hidden')) {
-                        startGame();
-                    }
+                if (showDonateOverlay) {
+                    showDonateOverlay = false;
+                } else if (gameState === 'PLAYING') {
+                    handleTap();
+                } else if (gameState === 'START' || gameState === 'GAMEOVER') {
+                    startGame();
                 }
             }
         });
@@ -658,7 +695,7 @@
         canvas.addEventListener('mousedown', handleTap);
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            handleTap();
+            handleTap(e);
         });
 
         document.getElementById('startBtn').addEventListener('click', startGame);
